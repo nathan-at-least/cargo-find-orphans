@@ -52,28 +52,25 @@ fn find_mod_paths(
     let contents = path.read_to_string_anyhow()?;
     let file = syn::parse_file(&contents)?;
     for item in file.items {
-        match item {
-            syn::Item::Mod(m) => {
-                if m.content.is_none() {
-                    let filename = format!("{}.rs", m.ident);
-                    let subpath = if toplevel {
-                        parent.join(filename)
-                    } else {
-                        let stem = path.file_stem_anyhow()?;
-                        parent.join(stem).join(filename)
-                    };
-                    paths.insert(subpath.to_path_buf());
-                    find_mod_paths(paths, &subpath, false)?;
+        if let syn::Item::Mod(m) = item {
+            if m.content.is_none() {
+                let filename = format!("{}.rs", m.ident);
+                let subpath = if toplevel {
+                    parent.join(filename)
                 } else {
-                    // Do nothing for embedded mods?
-                    /*
-                    use quote::ToTokens;
+                    let stem = path.file_stem_anyhow()?;
+                    parent.join(stem).join(filename)
+                };
+                paths.insert(subpath.to_path_buf());
+                find_mod_paths(paths, &subpath, false)?;
+            } else {
+                // Do nothing for embedded mods?
+                /*
+                use quote::ToTokens;
 
-                    unimplemented!("in {:?}:\n{:#}", path.display(), m.into_token_stream());
-                    */
-                }
+                unimplemented!("in {:?}:\n{:#}", path.display(), m.into_token_stream());
+                */
             }
-            _ => {}
         }
     }
     Ok(())
