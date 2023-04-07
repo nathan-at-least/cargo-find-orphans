@@ -19,13 +19,23 @@ fn find_orphans<P>(cratedir: P) -> anyhow::Result<Vec<PathBuf>>
 where
     P: AsRef<Path>,
 {
+    let cratedir = cratedir.as_ref();
     let mut modpaths = BTreeSet::new();
-    let mainpath = cratedir.as_ref().join("src/main.rs");
-    find_mod_paths(&mut modpaths, &mainpath, true)?;
+    let mut entrypaths = vec![];
+    for entrypoint in &["src/main.rs", "src/lib.rs"] {
+        let entrypath = cratedir.join(entrypoint);
+        if entrypath.is_file() {
+            find_mod_paths(&mut modpaths, &entrypath, true)?;
+            entrypaths.push(entrypath.strip_prefix_anyhow(cratedir)?.to_path_buf());
+        }
+    }
 
     let mut fspaths = BTreeSet::new();
     find_rs_paths(&mut fspaths, Path::new("src/"))?;
-    fspaths.remove(&mainpath);
+
+    for entrypath in entrypaths {
+        fspaths.remove(&entrypath);
+    }
 
     Ok(fspaths
         .difference(&modpaths)
