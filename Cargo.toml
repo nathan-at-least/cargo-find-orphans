@@ -18,3 +18,7 @@ features = [
   "full",
   "extra-traits",
 ]
+
+[dev-dependencies]
+include_dir = "0.7.3"
+tempfile = "3.5.0"

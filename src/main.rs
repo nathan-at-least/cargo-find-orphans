@@ -3,16 +3,8 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 fn main() -> anyhow::Result<()> {
-    let mut modpaths = BTreeSet::new();
-    let mainpath = PathBuf::from("src/main.rs");
-    find_mod_paths(&mut modpaths, &mainpath, true)?;
-
-    let mut fspaths = BTreeSet::new();
-    find_rs_paths(&mut fspaths, Path::new("src/"))?;
-    fspaths.remove(&mainpath);
-
     let mut orphans = String::new();
-    for orphan in fspaths.difference(&modpaths) {
+    for orphan in find_orphans(".")? {
         orphans = format!("{}{}\n", orphans, orphan.display());
     }
 
@@ -21,6 +13,24 @@ fn main() -> anyhow::Result<()> {
     } else {
         Err(anyhow::anyhow!("orphans found:\n{}", orphans))
     }
+}
+
+fn find_orphans<P>(cratedir: P) -> anyhow::Result<Vec<PathBuf>>
+where
+    P: AsRef<Path>,
+{
+    let mut modpaths = BTreeSet::new();
+    let mainpath = cratedir.as_ref().join("src/main.rs");
+    find_mod_paths(&mut modpaths, &mainpath, true)?;
+
+    let mut fspaths = BTreeSet::new();
+    find_rs_paths(&mut fspaths, Path::new("src/"))?;
+    fspaths.remove(&mainpath);
+
+    Ok(fspaths
+        .difference(&modpaths)
+        .map(|pb| pb.to_path_buf())
+        .collect())
 }
 
 fn find_mod_paths(
@@ -72,3 +82,6 @@ fn find_rs_paths(paths: &mut BTreeSet<PathBuf>, dir: &Path) -> anyhow::Result<()
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests;
