@@ -3,7 +3,7 @@ name = "cargo-find-orphans"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-description = "Find and optionally remove orphaned rust source files."
+description = "Find orphaned rust source files."
 
 [dependencies]
 anyhow = "1.0.70"
