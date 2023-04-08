@@ -3,9 +3,12 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 fn main() -> anyhow::Result<()> {
+    let cwd = std::env::current_dir()?;
     let mut orphans = String::new();
-    for orphan in find_orphans(".")? {
-        orphans = format!("{}{}\n", orphans, orphan.display());
+    for orphan in find_orphans(&cwd)? {
+        let relpath = orphan.strip_prefix_anyhow(&cwd)?;
+        let rpdisp = relpath.display();
+        orphans = format!("{orphans}{rpdisp}\n");
     }
 
     if orphans.is_empty() {
