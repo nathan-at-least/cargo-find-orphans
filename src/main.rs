@@ -19,14 +19,14 @@ fn find_orphans<P>(cratedir: P) -> anyhow::Result<Vec<PathBuf>>
 where
     P: AsRef<Path>,
 {
-    let cratedir = cratedir.as_ref();
+    let cratedir = cratedir.as_ref().canonicalize_anyhow()?;
     let mut modpaths = BTreeSet::new();
     let mut entrypaths = vec![];
     for entrypoint in &["src/main.rs", "src/lib.rs"] {
         let entrypath = cratedir.join(entrypoint);
         if entrypath.is_file() {
             find_mod_paths(&mut modpaths, &entrypath, true)?;
-            entrypaths.push(entrypath.strip_prefix_anyhow(cratedir)?.to_path_buf());
+            entrypaths.push(entrypath.to_path_buf());
         }
     }
 
@@ -61,7 +61,7 @@ fn find_mod_paths(
                     let stem = path.file_stem_anyhow()?;
                     parent.join(stem).join(filename)
                 };
-                paths.insert(subpath.to_path_buf());
+                paths.insert(subpath.canonicalize_anyhow()?);
                 find_mod_paths(paths, &subpath, false)?;
             } else {
                 // Do nothing for embedded mods?
@@ -84,7 +84,7 @@ fn find_rs_paths(paths: &mut BTreeSet<PathBuf>, dir: &Path) -> anyhow::Result<()
         if entry_type.is_dir() {
             find_rs_paths(paths, &entry_path)?;
         } else if entry_type.is_file() && entry_path.to_str_anyhow()?.ends_with(".rs") {
-            paths.insert(entry_path);
+            paths.insert(entry_path.canonicalize_anyhow()?);
         }
     }
     Ok(())
