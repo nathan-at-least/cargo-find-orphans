@@ -1,16 +1,16 @@
 [package]
 name = "cargo-find-orphans"
 version = "0.1.0"
+description = "Find orphaned rust source files."
+homepage = "https://github.com/nathan-at-least/cargo-find-orphans"
+repository = "https://github.com/nathan-at-least/cargo-find-orphans.git"
 edition = "2021"
 license = "MIT"
-description = "Find orphaned rust source files."
 
 [dependencies]
 anyhow = "1.0.70"
+anyhow-std = "0.1.1"
 quote = "1.0.26"
-
-[dependencies.anyhow-std]
-path = "../anyhow-std"
 
 [dependencies.syn]
 version = "2.0.11"
