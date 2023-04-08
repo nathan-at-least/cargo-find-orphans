@@ -13,6 +13,9 @@ pub fn run() -> anyhow::Result<()> {
     if orphans.is_empty() {
         Ok(())
     } else {
-        Err(anyhow::anyhow!("orphans found:\n{}", orphans))
+        Err(anyhow::anyhow!(
+            "orphans found (these are .rs files which are not mods within the crate):\n{}",
+            orphans
+        ))
     }
 }
