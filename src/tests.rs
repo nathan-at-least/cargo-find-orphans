@@ -52,21 +52,31 @@ fn test_crate(cratedir: &Path) -> anyhow::Result<()> {
 
     std::env::set_current_dir(cratedir)?;
     cargo_check()?;
+    test_find_orphans(file_name, &cratedir)?;
+    test_find_orphans(file_name, Path::new("."))?;
+    Ok(())
+}
 
-    println!("Finding orphans...");
+fn test_find_orphans(file_name: &str, cratedir: &Path) -> anyhow::Result<()> {
+    println!("Finding orphans in {:?}...", cratedir.display());
     let orphans = super::find_orphans(&cratedir)?;
 
     if file_name.starts_with("ok-") {
         if orphans.is_empty() {
             Ok(())
         } else {
-            Err(anyhow::anyhow!("unexpected failure:\n{:#?}", orphans))
+            Err(anyhow::anyhow!("unexpected failure:\n{orphans:#?}"))
         }
     } else if file_name.starts_with("err-") {
         if orphans.is_empty() {
             Err(anyhow::anyhow!("false negative for {:?}", file_name))
-        } else {
+        } else if orphans
+            .iter()
+            .all(|p| p.to_str_anyhow().unwrap().contains("dangly"))
+        {
             Ok(())
+        } else {
+            Err(anyhow::anyhow!("unexpected orphans: {orphans:#?}"))
         }
     } else {
         Err(anyhow::anyhow!(
