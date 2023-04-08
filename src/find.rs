@@ -2,23 +2,7 @@ use anyhow_std::PathAnyhow;
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-fn main() -> anyhow::Result<()> {
-    let cwd = std::env::current_dir()?;
-    let mut orphans = String::new();
-    for orphan in find_orphans(&cwd)? {
-        let relpath = orphan.strip_prefix_anyhow(&cwd)?;
-        let rpdisp = relpath.display();
-        orphans = format!("{orphans}{rpdisp}\n");
-    }
-
-    if orphans.is_empty() {
-        Ok(())
-    } else {
-        Err(anyhow::anyhow!("orphans found:\n{}", orphans))
-    }
-}
-
-fn find_orphans<P>(cratedir: P) -> anyhow::Result<Vec<PathBuf>>
+pub fn find_orphans<P>(cratedir: P) -> anyhow::Result<Vec<PathBuf>>
 where
     P: AsRef<Path>,
 {
@@ -92,6 +76,3 @@ fn find_rs_paths(paths: &mut BTreeSet<PathBuf>, dir: &Path) -> anyhow::Result<()
     }
     Ok(())
 }
-
-#[cfg(test)]
-mod tests;

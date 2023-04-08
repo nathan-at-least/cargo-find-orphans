@@ -59,7 +59,7 @@ fn test_crate(cratedir: &Path) -> anyhow::Result<()> {
 
 fn test_find_orphans(file_name: &str, cratedir: &Path) -> anyhow::Result<()> {
     println!("Finding orphans in {:?}...", cratedir.display());
-    let orphans = super::find_orphans(&cratedir)?;
+    let orphans = crate::find_orphans(&cratedir)?;
 
     if file_name.starts_with("ok-") {
         if orphans.is_empty() {
